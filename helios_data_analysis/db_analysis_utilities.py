@@ -47,7 +47,7 @@ class DatabaseInstance:
                 "`credentials.json` not found! Make sure you have the credentials from the wiki saved in a JSON file called `credentials.json`"
             )
             print(
-                "https://wiki.aris-space.ch/en/rocketry/engines/liquid/test-bench/data-acquisition-and-control-system/Subsystems/Software/Credentials"
+                "https://wiki.aris-space.ch/en/rocketry/engines/rotating-detonation"
             )
             sys.exit(1)
 

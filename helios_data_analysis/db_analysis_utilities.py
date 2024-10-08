@@ -24,7 +24,7 @@ class DatabaseInstance:
     ## Basic connection methods
     def __init__(self):
         self.connection = None
-        self.hostip = "127.0.0.1"
+        self.hostip = "perseus.vsos.ethz.ch"
         self.cursor = None
         self.tables = None
 

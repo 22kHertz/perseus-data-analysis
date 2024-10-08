@@ -10,3 +10,6 @@ helios_data_analysis/__pycache__/
 # Avoid committing credentials by accident
 credentials.json
 .Rproj.user
+
+# Ignore Raw data
+r_analysis/raw_data/

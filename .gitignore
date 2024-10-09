@@ -16,3 +16,6 @@ r_analysis/raw_data/
 
 # Ignore Processed data
 r_analysis/processed_data/
+
+#Ignore R History
+.Rhistory/

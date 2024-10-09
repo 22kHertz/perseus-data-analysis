@@ -35,6 +35,21 @@ processed_data_sens <- processed_data_sens |>
 processed_data_act <- processed_data_act |>
   relocate(zero_time)
 
+#Correct for any offset
+first_points <-  processed_data_sens |>
+  filter(zero_time <1100)|>
+  filter(sensor_id == 105)
+
+prdt_offset <-  mean(first_points$value)
+
+processed_data_sens <- processed_data_sens |>
+  mutate(value = case_when(
+    sensor_id == 105 ~ value - prdt_offset,
+    TRUE ~ value
+  ))
+
+
+
 # #Create df for each sensor (if needed)
 # processed_data_prdt_p <- processed_data_sens |>
 #   filter(sensor_id == 105)
@@ -49,5 +64,3 @@ processed_data_act <- processed_data_act |>
 #Save data as csv
 write_csv(processed_data_sens, "r_analysis/processed_data/processed_data_sens.csv")
 write_csv(processed_data_act, "r_analysis/processed_data/processed_data_act.csv")
-
-

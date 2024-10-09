@@ -1,7 +1,24 @@
+```{r}
+#| output: false
+#| echo: false
+
+# Only edit below this line
+#############################################################################
+test_number <- 16
+
+#Postition of Needle Valve O2 IGN
+valve_O2_pos <- 0.5    #Turns from close
+
+#Postition of Neelde valve PRDT
+valve_prdt_pos <- 0.1  #Turns from close
+#############################################################################
+# Only edit above this line
+```
+
 ---
 title: "Pre-Detonator Test"
-subtitle: "Test ID 16"
-date: 05.10.2024
+subtitle: "Test ID `r test_number`"
+date: 05.10.2024 
 author:
   - name: PERSEUS
     #orcid: 0009-0003-8702-2700
@@ -12,12 +29,13 @@ author:
 editor: visual
 format: 
   pdf:
+    output-file: "results_test.pdf"
     documentclass: scrartcl
     geometry:
-      - top=25mm
       - left=30mm
       - right=30mm
-      - bottom=25mm
+      - bottom=5mm
+      - top=1mm
 execute:
   eval: true
   echo: false
@@ -42,30 +60,20 @@ library(gt)
 processed_data_sens <- read_csv(file = "processed_data/processed_data_sens.csv")
 processed_data_act <- read_csv(file = "processed_data/processed_data_act.csv")
 
-#Test number (as in the excel sheet)
-test_id <- 17
-
-#Postition of Needle Valve O2 IGN
-valve_O2_pos <- 0.5    #Turns from close
-
-#Postition of Neelde valve PRDT
-valve_prdt_pos <-  0.1  #Turns from close
-
 #############################################################################
 # Only edit above this line
+
+test_id <- test_number + 1
 ```
 
 # Test Parameters
 
 ```{r}
-options(gt.html_tag_check = FALSE)
 
-# Create table with test data
 table_geom <- data.frame(
   O2_pos = paste(valve_O2_pos, "[T.f.c]"),
   prdt_pos = paste(valve_prdt_pos, "[T.f.c]")
 )
-
 
 table_geom |> 
   gt() |> 
@@ -76,11 +84,9 @@ table_geom |>
   cols_align(align = "center")
 ```
 
-# Plot results
+# Max Pressure Values
 
-The following plot shows the recorded pressure over time of both the PRDT pressure sensor and the ignition oxidizer pressure. The open state of the valve is marked by the grey box and it opens at t = 0.
-
-```{r, fig.width=10, fig.height=6}
+```{r}
 
 actuation_number_open <- (2*test_id)-1
 actuation_number_close <- 2*test_id
@@ -98,6 +104,35 @@ plot_data <-  processed_data_sens |>
 plot_data$zero_time <- plot_data$zero_time - actuation_time_open
 plot_data$sensor_id <- as.factor(plot_data$sensor_id)
 actuation_time_close_relative <-  actuation_time_close - actuation_time_open
+
+processed_data_prdt <- plot_data |>
+  filter(sensor_id == 105)
+
+processed_data_ign_ox <- plot_data |>
+  filter(sensor_id == 108)
+
+max_prdt_p <- max(processed_data_prdt$value)
+max_ign_ox_p <-  max(processed_data_ign_ox$value)
+
+table_max_p <-  data.frame(
+  prdt_p = paste(round(max_prdt_p, 2), "[barg]"),
+  ign_p = paste(round(max_ign_ox_p, 2), "[barg]")
+)
+
+table_max_p |> 
+  gt() |> 
+  cols_label(
+    prdt_p = ("Max Pressure in PRDT"), 
+    ign_p = ("Max Pressure in Ign Ox.")
+  ) |> 
+  cols_align(align = "center")
+```
+
+# Plot results
+
+The following plot shows the recorded pressure over time of both the PRDT pressure sensor and the ignition oxidizer pressure. The open state of the valve is marked by the grey box and it opens at t = 0.
+
+```{r, fig.width=10, fig.height=6}
 
 new_labels <- c(
   "105" = "PRDT Pressure",

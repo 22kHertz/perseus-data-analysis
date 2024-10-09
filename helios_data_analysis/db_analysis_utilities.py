@@ -94,17 +94,30 @@ class DatabaseInstance:
         return dfs
 
     def values_sensors(self, sensors, config_id):
-        values = {}
+        # Loop over the sensors
+        df_list = []
         for sensor in sensors:
-            print(sensor)
+            # Create a query to fetch the data
             query = f"SELECT * FROM sensor_values INNER JOIN sensors ON sensor_id = sensors.id WHERE config_id = {config_id} AND name LIKE '{sensor}'"
+            # Execute the query and fetch the data
             self.cursor.execute(query)
-            print("queried")
             rows = self.cursor.fetchall()
-            df = pd.DataFrame(rows)
-            df = df.sort_values(by=["timestamp"])
-            values[sensor] = df
-        return values
+            # Create a DataFrame from the data
+            df_tmp = pd.DataFrame(rows)
+            # Add a column with the sensor name
+            df_tmp["sensor"] = sensor
+            # Append the DataFrame to the list
+            df_list.append(df_tmp)
+        # Concat the DataFrames into one
+        df = pd.concat(df_list, ignore_index=True)
+        # Sort the DataFrame by sensor_id and timestamp
+        df = df.sort_values(by=["sensor_id", "timestamp"])
+        # Drop the columns that are not needed
+        df = df.drop(columns=["id", "name", "config_id", "sensor"])
+        # Reset the index
+        df.reset_index(drop=True, inplace=True)
+        return df
+
     def values_sensors_all(self, sensors):
         values = {}
         for sensor in sensors:
@@ -115,7 +128,7 @@ class DatabaseInstance:
             df = df.sort_values(by=["timestamp"])
             values[sensor] = df
         return values
-
+    
     def values_sensors_selected(self, sensors, ids):
         string = "AND ("
         for j, id in enumerate(ids):
@@ -134,17 +147,29 @@ class DatabaseInstance:
         return values
 
     def values_actuators(self, actuators, config_id):
-        values = {}
+        # Loop over the actuators
+        df_list = []
         for actuator in actuators:
-            print("query: actuator")
+            # Create a query to fetch the data
             query = f"SELECT * FROM actuator_values INNER JOIN actuators ON actuator_id = actuators.id WHERE config_id = {config_id} AND name LIKE '{actuator}'"
+            # Execute the query and fetch the data
             self.cursor.execute(query)
             rows = self.cursor.fetchall()
-            df = pd.DataFrame(rows)
-            df = df.sort_values(by=["timestamp"])
-            values[actuator] = df
-        return values
-
+            # Create a DataFrame from the data
+            df_tmp = pd.DataFrame(rows)
+            # Add a column with the actuator name
+            df_tmp["actuator"] = actuator
+            # Append the DataFrame to the list
+            df_list.append(df_tmp)
+        # Concat the DataFrames into one
+        df = pd.concat(df_list, ignore_index=True)
+        # Sort the DataFrame by sensor_id and timestamp
+        df = df.sort_values(by=["actuator_id", "timestamp"])
+        # Drop the columns that are not needed
+        df = df.drop(columns=["id", "name", "config_id", "actuator"])
+        # Reset the index
+        df.reset_index(drop=True, inplace=True)
+        return df
     def values_circuits(self, config_id):
         query = f"SELECT * FROM circuit_values INNER JOIN actuators ON actuator_id = actuators.id WHERE config_id = {config_id}"
         self.cursor.execute(query)

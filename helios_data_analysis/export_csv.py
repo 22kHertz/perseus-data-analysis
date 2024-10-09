@@ -3,55 +3,23 @@ import sys
 import pandas as pd
 from db_analysis_utilities import *
 def get_actuator_df(config_id, actuator_names):
-    """
-    This function fetches data for specified actuators and returns a pandas DataFrame.
-    The actuators are specified by their names (e.g. "Fuel Pump", "Oxygen Pump", ...).
-    The DataFrame contains the timestamp and the value of each actuator. The timestamp
-    is set as the index of the DataFrame.
-    """
     # Create a new DatabaseInstance
     with DatabaseInstance() as db:
         # Fetch the data for the specified actuators
         actuators = db.values_actuators(actuator_names, config_id)
-        # Create an empty DataFrame
-        df = pd.DataFrame()
-        # Iterate over the actuators and add the 'value' column to the DataFrame
-        for actuator in actuators:
-            df[actuator] = actuators[actuator]["value"]
-        # Add the timestamp column to the DataFrame
-        df["timestamp"] = actuators[actuator]["timestamp"]
-        # Set the timestamp as the index of the DataFrame
-        df.set_index("timestamp", inplace=True)
     # Return the DataFrame
-    return df
+    return actuators
 def get_sensor_df(config_id, sensor_names):
-    """
-    This function fetches data for specified sensors and returns a pandas DataFrame.
-    The sensors are specified by their names (e.g. "pressure", "temperature", ...).
-    The DataFrame contains the timestamp and the value of each sensor. The timestamp
-    is set as the index of the DataFrame.
-    """
     # Create a new DatabaseInstance
     with DatabaseInstance() as db:
         # Fetch the data for the specified sensors
         sensors = db.values_sensors(sensor_names, config_id)
-        # Create an empty DataFrame
-        df = pd.DataFrame()
-        # Iterate over the sensors and add the 'value' column to the DataFrame
-        for sensor in sensors:
-            df[sensor] = sensors[sensor]["value"]
-        # Add the timestamp column to the DataFrame
-        df["timestamp"] = sensors[sensor]["timestamp"]
-        # Set the timestamp as the index of the DataFrame
-        df.set_index("timestamp", inplace=True)
     # Return the DataFrame
-    return df
-
-
-
+    return sensors
 def test_date(config_id):
     with DatabaseInstance() as db:
         return db.get_test_date(config_id)
+
 
 def save_df_to_csv(df, filename):
     subfolder_name = "raw_data"
@@ -65,6 +33,8 @@ def save_df_to_csv(df, filename):
 
     # Save the DataFrame to the CSV file in the  subfolder
     df.to_csv(os.path.join(subfolder_path, filename), index = False)
+
+
 
 
 if __name__ == "__main__":
@@ -108,3 +78,4 @@ if __name__ == "__main__":
     
     # Save the DataFrame to the CSV file
     save_df_to_csv(df, filename)
+

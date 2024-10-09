@@ -1,0 +1,124 @@
+---
+title: "Pre-Detonator Test"
+subtitle: "Test ID 16"
+date: 05.10.2024
+author:
+  - name: PERSEUS
+    #orcid: 0009-0003-8702-2700
+    email: nbartzsch@ethz.ch
+    affiliation: 
+      - name: ARIS
+        url: https://aris-space.ch
+editor: visual
+format: 
+  pdf:
+    documentclass: scrartcl
+    geometry:
+      - top=25mm
+      - left=30mm
+      - right=30mm
+      - bottom=25mm
+execute:
+  eval: true
+  echo: false
+---
+
+```{r}
+#| output: false
+
+##Load libraries
+
+library(tidyverse)
+library(gt)
+```
+
+```{r}
+#| output: false
+#| echo: false
+
+# Only edit below this line
+#############################################################################
+# Import data
+processed_data_sens <- read_csv(file = "processed_data/processed_data_sens.csv")
+processed_data_act <- read_csv(file = "processed_data/processed_data_act.csv")
+
+#Test number (as in the excel sheet)
+test_id <- 17
+
+#Postition of Needle Valve O2 IGN
+valve_O2_pos <- 0.5    #Turns from close
+
+#Postition of Neelde valve PRDT
+valve_prdt_pos <-  0.1  #Turns from close
+
+#############################################################################
+# Only edit above this line
+```
+
+# Test Parameters
+
+```{r}
+options(gt.html_tag_check = FALSE)
+
+# Create table with test data
+table_geom <- data.frame(
+  O2_pos = paste(valve_O2_pos, "[T.f.c]"),
+  prdt_pos = paste(valve_prdt_pos, "[T.f.c]")
+)
+
+
+table_geom |> 
+  gt() |> 
+  cols_label(
+    O2_pos = ("Position of Needle Valve O2 IGN"), 
+    prdt_pos = ("Position of Needle Valve PRDT")
+  ) |> 
+  cols_align(align = "center")
+```
+
+# Plot results
+
+The following plot shows the recorded pressure over time of both the PRDT pressure sensor and the ignition oxidizer pressure. The open state of the valve is marked by the grey box and it opens at t = 0.
+
+```{r, fig.width=10, fig.height=6}
+
+actuation_number_open <- (2*test_id)-1
+actuation_number_close <- 2*test_id
+
+actuation_time_open <- as.numeric(processed_data_act[actuation_number_open, 1])
+actuation_time_close <-  as.numeric(processed_data_act[actuation_number_close, 1])
+
+actuation_time_before <- actuation_time_open - 0.5
+actuation_time_after <- actuation_time_close + 1
+
+plot_data <-  processed_data_sens |>
+  filter(zero_time > actuation_time_before) |>
+  filter(zero_time < actuation_time_after)
+
+plot_data$zero_time <- plot_data$zero_time - actuation_time_open
+plot_data$sensor_id <- as.factor(plot_data$sensor_id)
+actuation_time_close_relative <-  actuation_time_close - actuation_time_open
+
+new_labels <- c(
+  "105" = "PRDT Pressure",
+  "108" = "Ignition Ox. Pressure"
+)
+
+ggplot(plot_data, aes(x = zero_time, 
+                      y = value, 
+                      color = sensor_id)) +
+  geom_rect(aes(xmin = 0, xmax = actuation_time_close_relative, ymin = -Inf, ymax = Inf), 
+            fill = "#F0F0F0", color = NA, alpha = 0.3) +
+  geom_path(linewidth = 0.75)+
+  facet_wrap(~ sensor_id, 
+             ncol = 1,
+             labeller = as_labeller(new_labels), 
+             scales = "free") +
+  labs(
+    x = "Time [seconds]",  
+    y = "Pressure [barg]", 
+    color = "Pressure reading"
+  ) +
+  scale_color_manual(values = c("#ff0019", "#001e5e"), labels = new_labels) +
+  theme_minimal()
+```

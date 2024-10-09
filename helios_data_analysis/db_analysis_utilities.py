@@ -24,7 +24,7 @@ class DatabaseInstance:
     ## Basic connection methods
     def __init__(self):
         self.connection = None
-        self.hostip = "127.0.0.1"
+        self.hostip = "perseus.vsos.ethz.ch"
         self.cursor = None
         self.tables = None
 
@@ -47,7 +47,7 @@ class DatabaseInstance:
                 "`credentials.json` not found! Make sure you have the credentials from the wiki saved in a JSON file called `credentials.json`"
             )
             print(
-                "https://wiki.aris-space.ch/en/rocketry/engines/liquid/test-bench/data-acquisition-and-control-system/Subsystems/Software/Credentials"
+                "https://wiki.aris-space.ch/en/rocketry/engines/rotating-detonation"
             )
             sys.exit(1)
 

@@ -58,6 +58,7 @@ class DatabaseInstance:
             database=credentials["database"],
         )
         dbCursor = dbConnection.cursor(buffered=True, dictionary=True)
+        print("Connection established")
         return dbConnection, dbCursor
 
     def getTables(self):
@@ -104,7 +105,6 @@ class DatabaseInstance:
             df = df.sort_values(by=["timestamp"])
             values[sensor] = df
         return values
-
     def values_sensors_all(self, sensors):
         values = {}
         for sensor in sensors:

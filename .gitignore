@@ -6,6 +6,7 @@ helios_data_analysis/__pycache__/
 
 # Generated plots
 *.html
+*.pdf
 
 # Avoid committing credentials by accident
 credentials.json

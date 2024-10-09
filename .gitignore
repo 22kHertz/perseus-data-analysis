@@ -13,3 +13,6 @@ credentials.json
 
 # Ignore Raw data
 r_analysis/raw_data/
+
+# Ignore Processed data
+r_analysis/processed_data/

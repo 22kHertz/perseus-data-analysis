@@ -16,6 +16,15 @@ def get_sensor_df(config_id, sensor_names):
         sensors = db.values_sensors(sensor_names, config_id)
     # Return the DataFrame
     return sensors
+
+def get_state_df(config_id):
+    # Create a new Database Instance
+    with DatabaseInstance() as db:
+        # Fetch the data
+        states = db.values_states(config_id)
+    return states
+
+
 def test_date(config_id):
     with DatabaseInstance() as db:
         return db.get_test_date(config_id)
@@ -39,7 +48,7 @@ def save_df_to_csv(df, filename):
 
 if __name__ == "__main__":
     # Ask the user if they want sensor data or actuator data
-    data_type = input("Do you want sensor data or actuator data? (sensor/actuator): ")
+    data_type = input("Do you want sensor data or actuator data? (sensor/actuator/states): ")
     
     # Check if the user typed sensor or actuator
     if data_type.lower() == "sensor":
@@ -66,6 +75,12 @@ if __name__ == "__main__":
         
         # Get the actuator data from the database
         df = get_actuator_df(config_id, actuator_names)
+    elif data_type.lower() == "states":
+        # Ask the user for the config_id (the id of the test)
+        config_id = int(input("Enter the config_id: "))
+        
+        # Get the state data from the database
+        df = get_state_df(config_id)
     else:
         print("Invalid input! Stopping...")
         sys.exit(1)

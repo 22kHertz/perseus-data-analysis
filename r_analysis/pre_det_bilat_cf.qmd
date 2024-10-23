@@ -4,7 +4,7 @@
 
 # Only edit below this line
 #############################################################################
-test_number <- 1
+test_number <- 5
 
 #Postition of Needle Valve O2 IGN
 valve_O2_pos <- 0.5    #Turns from close
@@ -16,9 +16,9 @@ valve_prdt_pos <- 0.1  #Turns from close
 ```
 
 ---
-title: "Pre-Detonator Leakage Test"
-subtitle: "Test ID `r test_number`"
-date: 11.10.2024 
+title: "Pre-Detonator Firing"
+subtitle: "Firing  02"
+date: 12.10.2024 
 author:
   - name: PERSEUS
     #orcid: 0009-0003-8702-2700
@@ -29,7 +29,7 @@ author:
 editor: visual
 format: 
   pdf:
-    output-file: "results_test.pdf"
+    output-file: "results_bilat_cf.pdf"
     documentclass: scrartcl
     geometry:
       - left=30mm
@@ -85,14 +85,14 @@ table_geom |>
 
 ```{r}
 
-actuation_number_open <- (2*test_id)-1
-actuation_number_close <- 2*test_id
+actuation_number_open <- 11
+actuation_number_close <- actuation_number_open + 1
 
 actuation_time_open <- as.numeric(processed_data_act[actuation_number_open, 1])
 actuation_time_close <-  as.numeric(processed_data_act[actuation_number_close, 1])
 
 actuation_time_before <- actuation_time_open - 0.5
-actuation_time_after <- actuation_time_close + 1 
+actuation_time_after <- actuation_time_close + 5 
 
 plot_data <-  processed_data_sens |>
   filter(zero_time > actuation_time_before) |>
@@ -102,6 +102,15 @@ plot_data$zero_time <- plot_data$zero_time - actuation_time_open
 plot_data$sensor_id <- as.factor(plot_data$sensor_id)
 actuation_time_close_relative <-  actuation_time_close - actuation_time_open
 
+actuation_number_spark_on <- 33
+actuation_number_spark_off <- actuation_number_spark_on + 1
+
+spark_time_on <- as.numeric(processed_data_act[actuation_number_spark_on, 1]) - actuation_time_open
+spark_time_off <- as.numeric(processed_data_act[actuation_number_spark_off, 1]) - actuation_time_open
+
+spark_length <- spark_time_off -spark_time_on
+valve_open <-  actuation_time_close - actuation_time_open
+diff_close_spk <-  spark_time_on - (actuation_time_close - actuation_time_open)
 
 #processed_data_prdt <- plot_data |>
 #  filter(sensor_id == 105)
@@ -131,11 +140,17 @@ actuation_time_close_relative <-  actuation_time_close - actuation_time_open
 # 121 prdt pressure 
 ```
 
-```{r, fig.width=11, fig.height=6}
+### Measurements
+
+The first gray box indicates the opening time of the ignition oxidizer valve. The second time shows the time where the spark plug is active.
+
+```{r, fig.width=11, fig.height=11}
 
 new_labels <- c(
-  "105" = "Pre-Detonator Pressure",
-  "108" = "Ignition Ox Pressure"
+  "129" = "Ignition Fuel Pressure",
+  "136" = "Pre-Detonator Pressure",
+  "139" = "Ignition Oxidizer Pressure",
+  "142" = "Pre-Detonator Temperature"
 )
 
 #Facet plot
@@ -144,6 +159,8 @@ ggplot(plot_data, aes(x = zero_time,
                       color = sensor_id)) +
   geom_rect(aes(xmin = 0, xmax = actuation_time_close_relative, ymin = -Inf, ymax = Inf),
             fill = "grey", color = NA, alpha = 0.3) +
+  geom_rect(aes(xmin = spark_time_on, xmax = spark_time_off, ymin = -Inf, ymax = Inf),
+            fill = "grey", color = NA, alpha = 0.3) +
   geom_path(linewidth = 0.75)+
   facet_wrap(~ sensor_id,
              ncol = 1,
@@ -151,10 +168,10 @@ ggplot(plot_data, aes(x = zero_time,
              scales = "free") +
   labs(
     x = "Time [seconds]",
-    y = "Pressure [barg]",
-    color = "Pressure reading"
+    y = "Pressure [barg] / Temperature [°C]",
+    color = "Sensor readings"
   ) +
-  scale_color_manual(values = c("#ff0019", "#001e5e"), labels = new_labels) +
+  scale_color_manual(values = c("#ff0019", "orange", "#001e5e", "green"), labels = new_labels) +
   theme_minimal()
 
 
@@ -167,7 +184,7 @@ ggplot(plot_data, aes(x = zero_time,
 #   geom_path(linewidth = 0.75)+
 #   labs(
 #     x = "Time [seconds]",  
-#     y = "Pressure [barg]", 
+#     y = "Pressure [barg] / Temperatur [°C]", 
 #     color = "Pressure reading"
 #   ) +
 #   scale_color_manual(values = c("#ff0019", "#001e5e"), labels = new_labels) +

@@ -16,9 +16,8 @@ valve_prdt_pos <- 0.1  #Turns from close
 ```
 
 ---
-title: "Pre-Detonator Leakage Test"
-subtitle: "Test ID `r test_number`"
-date: 11.10.2024 
+title: "Pre-Detonator Unilateral Timing"
+date: 12.10.2024 
 author:
   - name: PERSEUS
     #orcid: 0009-0003-8702-2700
@@ -91,8 +90,8 @@ actuation_number_close <- 2*test_id
 actuation_time_open <- as.numeric(processed_data_act[actuation_number_open, 1])
 actuation_time_close <-  as.numeric(processed_data_act[actuation_number_close, 1])
 
-actuation_time_before <- actuation_time_open - 0.5
-actuation_time_after <- actuation_time_close + 1 
+actuation_time_before <- actuation_time_open - 0.25
+actuation_time_after <- actuation_time_open + 0.5 
 
 plot_data <-  processed_data_sens |>
   filter(zero_time > actuation_time_before) |>
@@ -131,6 +130,8 @@ actuation_time_close_relative <-  actuation_time_close - actuation_time_open
 # 121 prdt pressure 
 ```
 
+### $H_2$ $Timing$
+
 ```{r, fig.width=11, fig.height=6}
 
 new_labels <- c(
@@ -138,38 +139,57 @@ new_labels <- c(
   "108" = "Ignition Ox Pressure"
 )
 
-#Facet plot
-ggplot(plot_data, aes(x = zero_time,
+#Plot the first response
+plot_data_1 <- plot_data |>
+  filter(sensor_id == 105)
+
+plot_data_2 <- plot_data |>
+  filter(sensor_id == 108)
+
+#Ploting the data
+ggplot(plot_data_1, aes(x = zero_time,
                       y = value,
                       color = sensor_id)) +
-  geom_rect(aes(xmin = 0, xmax = actuation_time_close_relative, ymin = -Inf, ymax = Inf),
-            fill = "grey", color = NA, alpha = 0.3) +
+  geom_rect(aes(xmin = -Inf, xmax = 0, ymin = -Inf, ymax = Inf),
+            fill = "gray90", color = NA, alpha = 0.2) +
   geom_path(linewidth = 0.75)+
-  facet_wrap(~ sensor_id,
-             ncol = 1,
-             labeller = as_labeller(new_labels),
-             scales = "free") +
   labs(
     x = "Time [seconds]",
     y = "Pressure [barg]",
     color = "Pressure reading"
   ) +
-  scale_color_manual(values = c("#ff0019", "#001e5e"), labels = new_labels) +
-  theme_minimal()
+  scale_color_manual(values = c("#001e5e"), labels = new_labels) +
+  scale_x_continuous(
+    breaks = seq(floor(min(plot_data$zero_time)), ceiling(max(plot_data$zero_time)), by = 0.1)
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 1, vjust = 0.5),
+    panel.grid.minor.x = element_line(color = "gray90", linewidth = 0.2)
+  )
+```
 
+### $O_2$ $Timing$
 
-# #One plot with two curves
-# ggplot(plot_data, aes(x = zero_time, 
-#                       y = value, 
-#                       color = sensor_id)) +
-#   geom_rect(aes(xmin = 0, xmax = actuation_time_close, ymin = -Inf, ymax = Inf), 
-#             fill = "#d3d3d3", color = NA, alpha = 0.3) +
-#   geom_path(linewidth = 0.75)+
-#   labs(
-#     x = "Time [seconds]",  
-#     y = "Pressure [barg]", 
-#     color = "Pressure reading"
-#   ) +
-#   scale_color_manual(values = c("#ff0019", "#001e5e"), labels = new_labels) +
-#   theme_minimal()
+```{r, fig.width=11, fig.height=6}
+ggplot(plot_data_2, aes(x = zero_time,
+                      y = value,
+                      color = sensor_id)) +
+  geom_rect(aes(xmin = -Inf, xmax = 0, ymin = -Inf, ymax = Inf),
+            fill = "gray90", color = NA, alpha = 0.3) +
+  geom_path(linewidth = 0.75)+
+  labs(
+    x = "Time [seconds]",
+    y = "Pressure [barg]",
+    color = "Pressure reading"
+  ) +
+  scale_color_manual(values = c("#ff0019"), labels = new_labels) +
+  scale_x_continuous(
+    breaks = seq(floor(min(plot_data$zero_time)), ceiling(max(plot_data$zero_time)), by = 0.1)
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 1, vjust = 0.5),
+    panel.grid.minor.x = element_line(color = "gray90", linewidth = 0.2)
+  )
 ```

@@ -1,0 +1,25 @@
+------------------O2------------------
+-> 1 unilateral 
+	starts 3
+
+-> 2 unilateral
+	starts 11
+
+-> 3 unilateral
+	starts 13
+
+-> 4 unilateral
+	starts 15
+
+------------------H2------------------
+-> 1 unilateral
+	starts 37
+
+-> 2 unilateral
+	starts 41
+
+-> 3 unilateral
+	starts 45
+
+-> 4 unilateral
+	starts 47

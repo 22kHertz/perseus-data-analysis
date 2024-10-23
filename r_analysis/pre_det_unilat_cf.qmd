@@ -8,20 +8,23 @@
 valve_O2_pos <- 9    #Turns from close
 
 #Postition of Neelde valve H2 IGN
-valve_H2_pos <- 9  #Turns from close
+valve_H2_pos <- NA  #Turns from close
 
 #Pressure on the O2 pressure reducer
-O2_p_red <- 14.9  #in bar
+O2_p_red <- 10  #in bar
 
 #Pressure on H2 pressure reducer
-H2_p_red <- 15.1  #in bar
+H2_p_red <- NA  #in bar
+
+#Time to length given in frames recorded with 240 fps
+ttl <- 69
 #############################################################################
 # Only edit above this line
 ```
 
 ---
-title: "Bilateral Coldflow of Pre-Detonator"
-subtitle: "Coldflow  06"
+title: "Unilateral Coldflow of Pre-Detonator"
+subtitle: "O2 Coldflow  02"
 date: 18.10.2024 
 author:
   - name: PERSEUS
@@ -33,7 +36,7 @@ author:
 editor: visual
 format: 
   pdf:
-    output-file: "results_bilat_cf.pdf"
+    output-file: "results_unilat_O2_02.pdf"
     documentclass: scrartcl
     geometry:
       - left=30mm
@@ -76,8 +79,9 @@ processed_data_act <- read_csv(file = "processed_data/processed_data_act.csv")
 table_geom <- data.frame(
   O2_pos = paste(valve_O2_pos, "[t.f.c]"),
   O2_pre = paste(O2_p_red, "[bar]"),
-  H2_pos = paste(valve_H2_pos, "[t.f.c]"),
-  H2_pre = paste(H2_p_red, "[bar]")
+  # H2_pos = paste(valve_H2_pos, "[t.f.c]"),
+  # H2_pre = paste(H2_p_red, "[bar]"),
+  TTL = paste(ttl, "[frames]")
 )
 
 #Create table
@@ -86,8 +90,9 @@ table_geom |>
   cols_label(
     O2_pos = ("NV O2 IGN"),
     O2_pre = ("Pressure on O2 PRV"),
-    H2_pos = ("NV H2 IGN"),
-    H2_pre = ("Pressure on H2 PRV")
+    # H2_pos = ("NV H2 IGN"),
+    # H2_pre = ("Pressure on H2 PRV"),
+    TTL = ("Time to length")
   ) |> 
   cols_align(align = "center")
 ```
@@ -95,54 +100,43 @@ table_geom |>
 ```{r}
 #Get time of actuations
 
-#Get index numbers from first actuations of  the sequence
-actuation_fue <- 29
-actuation_oxd <- 63
-actuation_spk <- 77 
+#Get index number from opening actuation
+actuation_open <- 41
 
-#Get opening and closing times of fue 
-time_fue_open <- as.numeric(processed_data_act[actuation_fue, 1])
-time_fue_close <- as.numeric(processed_data_act[actuation_fue + 1, 1])
-
-#Get opening and closing times of oxd 
-time_oxd_open <- as.numeric(processed_data_act[actuation_oxd, 1])
-time_oxd_close <- as.numeric(processed_data_act[actuation_oxd + 1, 1])
-
-#Get opening and closing times of spk
-time_spk_open <- as.numeric(processed_data_act[actuation_spk, 1])
-time_spk_close <- as.numeric(processed_data_act[actuation_spk + 1, 1])
+#Get opening and closing times of actuator
+time_open <- as.numeric(processed_data_act[actuation_open, 1])
+time_close <- as.numeric(processed_data_act[actuation_open + 1, 1])
 
 #Start the plot 0.5 sec before first actuation and end 5s after last actuation
-start_plot_time <-  time_fue_open - 0.5
-end_plot_time <- time_fue_open + 5
+start_plot_time <-  time_open - 0.5
+end_plot_time <- time_open + 3
 
-#Create new df only containing smapl points of interest
+#Create new df only containing points of interest
 plot_data <-  processed_data_sens |>
   filter(zero_time > start_plot_time) |>
   filter(zero_time < end_plot_time)
 
 #Set zero to be at first actuation
-plot_data$zero_time <- plot_data$zero_time - time_fue_open
+plot_data$zero_time <- plot_data$zero_time - time_open
 
-#Get actuation times in new zero time
-time_fue_close <- time_fue_close - time_fue_open
-time_oxd_open <- time_oxd_open - time_fue_open
-time_oxd_close <- time_oxd_close - time_fue_open
-time_spk_open <- time_spk_open - time_fue_open
-time_spk_close <- time_spk_close - time_fue_open
+#Get actuation time in new zero time
+time_close <- time_close - time_open
 
 #Convert sensor_id to factors to allow for facet polt
 plot_data$sensor_id <- as.factor(plot_data$sensor_id)
+
+#Remove the not used gas from plot df
+plot_data <- plot_data |>
+  filter(sensor_id != 159)
 ```
 
 ### Measurements
 
-The first gray box indicates the opening time of the valves. The darker grey shows the active time of the spark plug.
+The gray box indicates the opening time of the valve.
 
-```{r, fig.width=11, fig.height=10}
+```{r, fig.width=11, fig.height=8}
 
 new_labels <- c(
-  "159" = "Ignition Fuel Pressure",
   "166" = "Pre-Detonator Pressure",
   "169" = "Ignition Oxidizer Pressure"
 )
@@ -151,10 +145,8 @@ new_labels <- c(
 ggplot(plot_data, aes(x = zero_time,
                       y = value,
                       color = sensor_id)) +
-  geom_rect(aes(xmin = 0, xmax = time_fue_close, ymin = -Inf, ymax = Inf),
+  geom_rect(aes(xmin = 0, xmax = time_close, ymin = -Inf, ymax = Inf),
             fill = "#D3D3D3", color = NA, alpha = 0.3) +
-  geom_rect(aes(xmin = time_spk_open, xmax = time_spk_close, ymin = -Inf, ymax = Inf),
-            fill = "#808080", color = NA, alpha = 0.3) +
   geom_path(linewidth = 0.75)+
   facet_wrap(~ sensor_id,
              ncol = 1,
@@ -165,7 +157,7 @@ ggplot(plot_data, aes(x = zero_time,
     y = "Pressure [barg]",
     color = "Sensor readings"
   ) +
-  scale_color_manual(values = c("#ff0019", "#FF8624", "#001e5e"), labels = new_labels) +
+  scale_color_manual(values = c("#FF8624", "#001e5e", "#ff0019"), labels = new_labels) +
   theme_minimal()
 ```
 

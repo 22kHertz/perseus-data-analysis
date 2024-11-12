@@ -1,5 +1,6 @@
 # Python virtual environment
 .venv/
+venv/
 
 # Python cache
 helios_data_analysis/__pycache__/

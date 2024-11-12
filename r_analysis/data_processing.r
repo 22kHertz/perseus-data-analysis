@@ -2,19 +2,15 @@ library(tidyverse)
 library(dplyr)
 library(readr)
 
-#sens:  prdt_p      159
-#       ign_fue_p   166
-#       ign_oxd_p   169
+#sens:  mnl_oss_p, rnl_oss_p, oss_pln_p, fss_mnl_p, fss_rnl_p, fss_pln_p, fss_mf
 
-# act:  fue   216
-#       ox    217 
-#       spk   218
+# act:  at_oss_pur, at_fss_pur, at_oss_mnv, at_fss_mnv, at_oss_emgu, at_oss_emgd, at_fss_emg, at_oss_war
 
-sensor_ids <- c(159, 166, 169)
+sensor_ids <- c(227:246)
 
 #Import raw data
-raw_data_sens <- read.csv('r_analysis/raw_data/sensor_11_10-18-2024.csv')
-raw_data_act <- read.csv('r_analysis/raw_data/actuator_11_10-18-2024.csv')
+raw_data_sens <- read.csv('r_analysis/raw_data/sensor_15_10-25-2024.csv')
+raw_data_act <- read.csv('r_analysis/raw_data/actuator_15_10-25-2024.csv')
 
 
 #Delete not needed data
@@ -44,19 +40,19 @@ processed_data_act <- processed_data_act |>
 #Correct for any offset (taking mean over first values until first actuation)
 first_act <- min(processed_data_act$zero_time) -100
 
-for (id in sensor_ids) {
-  first_points <- processed_data_sens |>
-    filter(zero_time < first_act) |>
-    filter(sensor_id == id)
-  
-  offset <- mean(first_points$value)
-  
-  processed_data_sens <- processed_data_sens |>
-    mutate(value = case_when(
-      sensor_id == id ~ value - offset,
-      TRUE ~ value
-    ))
-}
+# for (id in sensor_ids) {
+#   first_points <- processed_data_sens |>
+#     filter(zero_time < first_act) |>
+#     filter(sensor_id == id)
+#   
+#   offset <- mean(first_points$value)
+#   
+#   processed_data_sens <- processed_data_sens |>
+#     mutate(value = case_when(
+#       sensor_id == id ~ value - offset,
+#       TRUE ~ value
+#     ))
+# }
 
 
 #Save data as csv

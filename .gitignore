@@ -19,5 +19,8 @@ r_analysis/raw_data/
 # Ignore Processed data
 r_analysis/processed_data/
 
-#Ignore R History
+#Ignore R Files
 .Rhistory/
+.DS_Store
+.RData
+.Rhistory
